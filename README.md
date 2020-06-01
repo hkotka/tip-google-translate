@@ -4,6 +4,8 @@ Google cloud translations API integration for Universal Tip.
 This is a provider script for a [Universal Tip](https://github.com/tanin47/tip) program for MacOS.
 The script looks for a translation to target language using Google Translate API when Tip is invoked.
 
+![Image - Screenshot](resources/Screenshot.png)
+
 ##Requirements
 * Google Cloud account
 * Cloud Translation API Enabled
