@@ -1,4 +1,4 @@
-module tip-gcloud-translate
+module tip-google-translate
 
 go 1.14
 
