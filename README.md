@@ -6,12 +6,12 @@ The script looks for a translation to target language using Google Translate API
 
 ![Image - Screenshot](resources/Screenshot.png)
 
-##Requirements
+## Requirements
 * Google Cloud account
 * Cloud Translation API Enabled
 * Service Account with priveleges to use Translations API
   * credentials.json file for the Service Account accessible for this provider script
   
-##Usage
+## Usage
 * On main.go, change const values to match your setup
 * Run build-deploy.sh
