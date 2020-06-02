@@ -16,7 +16,7 @@ import (
 const (
 	gcCredsFile  = "credentials.json"
 	gcTargetLang = "en-US"
-	gcProject    = "my-gcloud-project"
+	gcProject    = "projects/my-gcloud-project"
 )
 
 func main() {
