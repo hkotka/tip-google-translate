@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	gcCredsFile  = "credentials.json"
-	gcTargetLang = "en-US"
-	gcProject    = "projects/my-gcloud-project"
+	gcCredentialsFile = "credentials.json"
+	gcTargetLanguage  = "en-US"
+	gcProject         = "projects/my-gcloud-project"
 )
 
 func main() {
@@ -30,33 +30,29 @@ func main() {
 	if isHTTP.MatchString(strInputText) {
 		return
 	} else {
-		c := gcCreateClient()
-		translation := gcTranslateText(c, inputText)
+		c, ctx := gcCreateClient()
+		translation := gcTranslateText(c, ctx, inputText)
 		text = fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation)
 	}
 	fmt.Printf(text)
 }
 
-func gcCreateClient() *translate.TranslationClient {
-	d := contextTime()
-	ctx, cancel := context.WithDeadline(context.Background(), d)
-	defer cancel()
-
-	c, err := translate.NewTranslationClient(ctx, option.WithCredentialsFile(gcCredsFile))
+func gcCreateClient() (*translate.TranslationClient, context.Context) {
+	ctx := context.Background()
+	c, err := translate.NewTranslationClient(ctx, option.WithCredentialsFile(gcCredentialsFile))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return c
+	return c, ctx
 }
 
-func gcTranslateText(c *translate.TranslationClient, text []string) string {
-	d := contextTime()
-	ctx, cancel := context.WithDeadline(context.Background(), d)
+func gcTranslateText(c *translate.TranslationClient, ctx context.Context, text []string) string {
+	ctx, cancel := context.WithDeadline(ctx, contextTime())
 	defer cancel()
 	req := &translatepb.TranslateTextRequest{
 		Contents:           text,
-		TargetLanguageCode: gcTargetLang,
+		TargetLanguageCode: gcTargetLanguage,
 		Parent:             gcProject,
 	}
 
