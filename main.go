@@ -17,6 +17,7 @@ const (
 	gcCredentialsFile = "credentials.json"
 	gcTargetLanguage  = "en-US"
 	gcProject         = "projects/my-gcloud-project"
+	ctxTimeout        = 15
 )
 
 func main() {
@@ -48,7 +49,7 @@ func gcCreateClient() (*translate.TranslationClient, context.Context) {
 }
 
 func gcTranslateText(c *translate.TranslationClient, ctx context.Context, text []string) string {
-	ctx, cancel := context.WithDeadline(ctx, contextTime())
+	ctx, cancel := context.WithDeadline(ctx, contextTimeout())
 	defer cancel()
 	req := &translatepb.TranslateTextRequest{
 		Contents:           text,
@@ -63,7 +64,7 @@ func gcTranslateText(c *translate.TranslationClient, ctx context.Context, text [
 	return resp.Translations[0].DetectedLanguageCode + " - " + resp.Translations[0].TranslatedText
 }
 
-func contextTime() time.Time {
-	t := time.Now().Add(15 * time.Second)
+func contextTimeout() time.Time {
+	t := time.Now().Add(ctxTimeout * time.Second)
 	return t
 }
