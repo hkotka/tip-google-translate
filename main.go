@@ -1,16 +1,17 @@
 package main
 
 import (
-	translate "cloud.google.com/go/translate/apiv3"
 	"context"
 	"fmt"
-	"google.golang.org/api/option"
-	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 	"time"
+
+	translate "cloud.google.com/go/translate/apiv3"
+	"google.golang.org/api/option"
+	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
 )
 
 const (
@@ -30,25 +31,24 @@ func main() {
 	isHTTP := regexp.MustCompile(`^https?://`)
 	if isHTTP.MatchString(strInputText) {
 		return
-	} else {
-		c, ctx := gcCreateClient()
-		translation := gcTranslateText(c, ctx, inputText)
-		text = fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation)
 	}
+	ctx, c := gcCreateClient()
+	translation := gcTranslateText(ctx, c, inputText)
+	text = fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation)
 	fmt.Printf(text)
 }
 
-func gcCreateClient() (*translate.TranslationClient, context.Context) {
+func gcCreateClient() (context.Context, *translate.TranslationClient) {
 	ctx := context.Background()
 	c, err := translate.NewTranslationClient(ctx, option.WithCredentialsFile(gcCredentialsFile))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return c, ctx
+	return ctx, c
 }
 
-func gcTranslateText(c *translate.TranslationClient, ctx context.Context, text []string) string {
+func gcTranslateText(ctx context.Context, c *translate.TranslationClient, text []string) string {
 	ctx, cancel := context.WithDeadline(ctx, contextTimeout())
 	defer cancel()
 	req := &translatepb.TranslateTextRequest{
