@@ -1,24 +1,24 @@
 package main
 
 import (
+	"cloud.google.com/go/translate"
 	"context"
+	_ "embed"
 	"fmt"
-	"log"
+	"golang.org/x/text/language"
+	"google.golang.org/api/option"
 	"os"
 	"regexp"
 	"strings"
 	"time"
-
-	translate "cloud.google.com/go/translate/apiv3"
-	"google.golang.org/api/option"
-	translatepb "google.golang.org/genproto/googleapis/cloud/translate/v3"
 )
 
+//go:embed credentials.json
+var gcCredentialsJson []byte
+
 const (
-	gcCredentialsFile = "credentials.json"
-	gcTargetLanguage  = "en-US"
-	gcProject         = "projects/my-gcloud-project"
-	ctxTimeout        = 15
+	gcTargetLanguage = "en"
+	ctxTimeout       = 15
 )
 
 func main() {
@@ -32,36 +32,38 @@ func main() {
 	if isHTTP.MatchString(strInputText) {
 		return
 	}
-	ctx, c := gcCreateClient()
-	translation := gcTranslateText(ctx, c, inputText)
+	translation, err := translateText(gcTargetLanguage, inputText[0])
+	if err != nil {
+		fmt.Println(err)
+	}
 	text = fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation)
 	fmt.Printf(text)
 }
 
-func gcCreateClient() (context.Context, *translate.TranslationClient) {
+func translateText(targetLanguage, text string) (string, error) {
 	ctx := context.Background()
-	c, err := translate.NewTranslationClient(ctx, option.WithCredentialsFile(gcCredentialsFile))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return ctx, c
-}
-
-func gcTranslateText(ctx context.Context, c *translate.TranslationClient, text []string) string {
 	ctx, cancel := context.WithDeadline(ctx, contextTimeout())
 	defer cancel()
-	req := &translatepb.TranslateTextRequest{
-		Contents:           text,
-		TargetLanguageCode: gcTargetLanguage,
-		Parent:             gcProject,
+
+	lang, err := language.Parse(targetLanguage)
+	if err != nil {
+		return "", fmt.Errorf("language.Parse: %v", err)
 	}
 
-	resp, err := c.TranslateText(ctx, req)
+	client, err := translate.NewClient(ctx, option.WithCredentialsJSON(gcCredentialsJson))
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
-	return resp.Translations[0].DetectedLanguageCode + " - " + resp.Translations[0].TranslatedText
+	defer client.Close()
+
+	resp, err := client.Translate(ctx, []string{text}, lang, nil)
+	if err != nil {
+		return "", fmt.Errorf("translate: %v", err)
+	}
+	if len(resp) == 0 {
+		return "", fmt.Errorf("translate returned empty response to text: %s", text)
+	}
+	return resp[0].Text, nil
 }
 
 func contextTimeout() time.Time {
