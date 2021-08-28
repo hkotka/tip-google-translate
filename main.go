@@ -22,22 +22,19 @@ const (
 )
 
 func main() {
-	var text string
-	var inputText = make([]string, 0)
-	inputText = append(inputText, os.Args[1])
-	strInputText := strings.Trim(fmt.Sprintf("%s", inputText), "[]")
 
 	// Don't try to translate links
 	isHTTP := regexp.MustCompile(`^https?://`)
-	if isHTTP.MatchString(strInputText) {
+	if isHTTP.MatchString(strings.Trim(fmt.Sprintf("%s", os.Args[1]), "[]")) {
 		return
 	}
-	translation, err := translateText(gcTargetLanguage, inputText[0])
+
+	translation, err := translateText(gcTargetLanguage, os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 	}
-	text = fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation)
-	fmt.Printf(text)
+
+	fmt.Printf(fmt.Sprintf("[{\"type\": \"text\", \"value\": \"Google Translate\"},{\"type\": \"text\", \"value\": \"%s\"}]", translation))
 }
 
 func translateText(targetLanguage, text string) (string, error) {
