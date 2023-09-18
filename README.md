@@ -13,6 +13,6 @@ The script looks for a translation to target language using Google Translate API
   * credentials.json file for the Service Account accessible for this provider script
   
 ## Usage
-* On `main.go`, change const `gcTargetLanguage` value to match your desired target language
+* Default target language for translations is `en`, but can be overridden by setting `TIP_LANG` environment variable before running the `build-deploy.sh` script. 
 * Have your GCP credentials on project root named as `credentials.json` during build time
 * Run build-deploy.sh

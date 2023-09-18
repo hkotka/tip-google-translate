@@ -17,9 +17,14 @@ import (
 var gcCredentialsJson []byte
 
 const (
-	gcTargetLanguage = "en"
-	ctxTimeout       = 15
+	ctxTimeout     = 3
 )
+
+
+var (
+	targetLanguage string 
+)
+
 
 func main() {
 
@@ -29,7 +34,7 @@ func main() {
 		return
 	}
 
-	translation, err := translateText(gcTargetLanguage, os.Args[1])
+	translation, err := translateText(targetLanguage, os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 	}
